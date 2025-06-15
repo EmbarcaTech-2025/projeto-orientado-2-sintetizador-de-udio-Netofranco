@@ -15,9 +15,9 @@ if(WIN32)
 else()
     set(USERHOME $ENV{HOME})
 endif()
-set(sdkVersion 2.1.1)
-set(toolchainVersion 14_2_Rel1)
-set(picotoolVersion 2.1.1)
+set(sdkVersion 1.5.1)
+set(toolchainVersion 13_3_Rel1)
+set(picotoolVersion 2.0.0)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
@@ -28,42 +28,44 @@ set(PICO_BOARD pico_w CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(synth_audio C CXX ASM)
+project(sintetizador_audio C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable( synth_audio
-  main.c
-)
+add_executable(sintetizador_audio 
+    src/main.c
+    src/audio.c
+    src/display.c
+    src/gpio_control.c
+    lib/ssd1306/ssd1306_i2c.c)
 
-pico_set_program_name(synth_audio "synth_audio")
-pico_set_program_version(synth_audio "0.1")
+pico_set_program_name(sintetizador_audio "sintetizador_audio")
+pico_set_program_version(sintetizador_audio "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(synth_audio 0)
-pico_enable_stdio_usb(synth_audio 1)
+pico_enable_stdio_uart(sintetizador_audio 0)
+pico_enable_stdio_usb(sintetizador_audio 1)
 
 # Add the standard library to the build
-target_link_libraries(synth_audio
-        # Biblioteca padrão do Pico SDK, que fornece funções básicas para o RP2040 (GPIO, temporizadores, UART, etc.).
-        pico_stdlib
-        )
+target_link_libraries(sintetizador_audio
+        pico_stdlib)
 
 # Add the standard include files to the build
-target_include_directories(synth_audio PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}
+target_include_directories(sintetizador_audio PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/include
+        ${CMAKE_CURRENT_LIST_DIR}/lib/ssd1306
 )
 
 # Add any user requested libraries
-target_link_libraries(synth_audio 
+target_link_libraries(sintetizador_audio 
         hardware_adc
-        hardware_dma
         hardware_pwm
-)
+        hardware_dma
+        hardware_i2c
+        )
 
-pico_add_extra_outputs(synth_audio)
+pico_add_extra_outputs(sintetizador_audio)
 
